@@ -129,14 +129,14 @@ def updateMods():
 def buildSystemd():
     if SYSTEMD_BUILD:
         print("Build Server-File")
-        serverFileContent = '[Unit] \n Description= Arma3Server Service File \n \n'
-        serverFileContent += '[Service] \n Type=simple \n Restart=on-failure \n User=' + SYSTEMD_USER + ' \n Group=' + SYSTEMD_GROUP + ' \n WorkingDirectory=' + ARMA_SERVER_PATH + '/  \n ExecStart=' + ARMA_SERVER_PATH + '/./arma3server_x64 -exThreads=7 -config=server.cfg '
+        serverFileContent = '[Unit] \n Description= Arma3Server Service File \n Wants=network-online.target \n Before=arma.target \n PartOf=arma.target \n \n'
+        serverFileContent += '[Service] \n Type=simple \n Restart=on-failure \n ExecStartPre=/bin/sleep 10 \n User=' + SYSTEMD_USER + ' \n Group=' + SYSTEMD_GROUP + ' \n WorkingDirectory=' + ARMA_SERVER_PATH + '/  \n ExecStart=' + ARMA_SERVER_PATH + '/./arma3server_x64 -exThreads=7 -config=server.cfg '
         modRelativePath = ARMA_MOD_PATH.split("/")
         for modName, modID in MODS.items():
             serverFileContent += ' "-mod=' + modRelativePath[-1] + '/' + modName + '"'
 
         serverFileContent += '\n'
-        serverFileContent += '[Install] \n WantedBy=multi-user.target'
+        serverFileContent += '[Install] \n WantedBy=arma.target'
 
         with open('/etc/systemd/system/' + SYSTEMD_SERVER_SERVICE + '.service', 'w+') as file:
             file.write(serverFileContent)
@@ -147,22 +147,28 @@ def buildSystemd():
             count = 0
             while count < SYSTEMD_HEADLESS_COUNT:
                 print("Build Headless-File for Headless-Client Number " + str(count))
-                serverFileContent = '[Unit] \n Description= Arma3Server Headless File \n \n'
-                serverFileContent += '[Service] \n Type=simple \n Restart=on-failure \n User=' + SYSTEMD_USER + ' \n Group=' + SYSTEMD_GROUP + ' \n WorkingDirectory=' + ARMA_SERVER_PATH + '/  \n ExecStart=' + ARMA_SERVER_PATH + '/./arma3server_x64 -client -connect=' + HEADLESS_CONNECT_ADDRESS + ' -port=' + str(HEADLESS_CONNECT_PORT) + ' -password=' + HEADLESS_SERVER_PASSWORD
+                serverFileContent = '[Unit] \n Description= Arma3Server Headless File \n Wants=network-online.target \n Before=arma.target PartOf=arma.target \n After=armaserver.service \n \n'
+                serverFileContent += '[Service] \n Type=simple \n Restart=on-failure \n ExecStartPre=/bin/sleep/10 \n User=' + SYSTEMD_USER + ' \n Group=' + SYSTEMD_GROUP + ' \n WorkingDirectory=' + ARMA_SERVER_PATH + '/  \n ExecStart=' + ARMA_SERVER_PATH + '/./arma3server_x64 -client -connect=' + HEADLESS_CONNECT_ADDRESS + ' -port=' + str(HEADLESS_CONNECT_PORT) + ' -password=' + HEADLESS_SERVER_PASSWORD
                 modRelativePath = ARMA_MOD_PATH.split("/")
                 for modName, modID in MODS.items():
                     serverFileContent += ' "-mod=' + modRelativePath[-1] + '/' + modName + '"'
 
                 serverFileContent += '\n'
-                serverFileContent += '[Install] \n WantedBy=multi-user.target'
+                serverFileContent += '[Install] \n WantedBy=arma.target'
 
                 with open('/etc/systemd/system/' + SYSTEMD_HEADLESS_SERVICE + str(count) + '.service', 'w+') as file:
                     file.write(serverFileContent)
                 count = count + 1
-                # Reload SystemCTL-Daemon
-            os.system('systemctl daemon-reload')
+
+        # Build Target-File
+        armatarget = '[Unit] \n Decription=Arma3-Server \n \n [Install] \n WantedBy=multi-user.target \n'
+
+        with open('/etc/systemd/system/arma.target', 'w+') as target:
+            target.write(armatarget)
+
+        # Reload SystemCTL-Daemon
+        os.system('systemctl daemon-reload')
         # Set correct permissions
-        os.system('chown ' + SYSTEMD_USER + ':' + SYSTEMD_GROUP + ' ' + ARMA_SERVER_PATH + ' -R')
         os.system('chown ' + SYSTEMD_USER + ':' + SYSTEMD_GROUP + ' ' + ARMA_MOD_PATH + ' -R')
 
 # First we need our HTML-File from Arma3Launcher
