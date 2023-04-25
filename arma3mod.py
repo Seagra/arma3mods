@@ -54,9 +54,8 @@ def steamcmd(parameters):
 
 # Set mods to lowercase to prevent unix-problems, only used on unix-machines
 def lowercase_mods():
-    if platform.system() == "Linux":
-        print("Start Lowercase-Mods")
-        os.system("(cd {} && find . -depth -exec rename -v 's/(.*)\/([^\/]*)/$1\/\L$2/' {{}} \;)".format(A3_WORKSHOP_DIR))
+    print("Start Lowercase-Mods")
+    os.system("(cd {} && find . -depth -exec rename -v 's/(.*)\/([^\/]*)/$1\/\L$2/' {{}} \;)".format(A3_WORKSHOP_DIR))
 
 
 # set links for arma3-server
@@ -81,12 +80,9 @@ def createSymLinks():
 # Check for Modification Update
 def modUpdate(modID, modPath):
     if os.path.exists(ARMA_MOD_PATH):
-        if platform.system() == "Linux":
-            response = request.urlopen("{}/{}".format(A3_CHANGELOG_URL, modID)).read()
-            response = response.decode('utf-8')
-        else:
-            response = request.urlopen("{}\\{}".format(A3_CHANGELOG_URL, modID)).read()
-            response = response.decode('utf-8')
+        response = request.urlopen("{}/{}".format(A3_CHANGELOG_URL, modID)).read()
+        response = response.decode('utf-8')
+
         matchPattern = A3_UPDATE_PATTERN.search(response)
 
         if matchPattern:
