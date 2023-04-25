@@ -216,6 +216,7 @@ elif len(sys.argv) == 6:
                 modID = row_id[1]
                 MODS[row_cell] = modID
 
+
             # Check if result is empty
             if len(MODS) > 0:
                 ARMA_SERVER_PATH = sys.argv[2]
