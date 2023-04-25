@@ -222,6 +222,7 @@ elif len(sys.argv) == 6:
                 ARMA_MOD_PATH = ARMA_SERVER_PATH + '/mods'
                 STEAM_USER = sys.argv[4]
                 STEAM_PASSWORD = sys.argv[5]
+                A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
 
                 # Log in with anonymous-user
                 if STEAM_USER == "anonymous":
