@@ -1,3 +1,4 @@
+import getopt
 import os
 import platform
 import sys
@@ -19,6 +20,7 @@ ARMA_MOD_PATH = ARMA_SERVER_PATH + '/mods'
 STEAM_USER = ''
 STEAM_PASSWORD = ''
 STEAMCMD = ''
+MODSET_FILE = '/home/modset.html'
 
 ARMA3_WORKSHOP_ID = '107410'
 ARMA3_SERVER_ID = '233780'
@@ -171,13 +173,98 @@ def buildSystemd():
         # Set correct permissions
         os.system('chown ' + SYSTEMD_USER + ':' + SYSTEMD_GROUP + ' ' + ARMA_MOD_PATH + ' -R')
 
-# First we need our HTML-File from Arma3Launcher
 
-if len(sys.argv) == 2:
-    # Check if file exists, when file exists now we want to read the content ;D
-    if os.path.exists(sys.argv[1]):
+# Cleanup for Mods when they are not in html
+def  cleanUp():
+    if os.path.exists(A3_WORKSHOP_DIR) and os.path.exists(ARMA_MOD_PATH):
+        workshop_dir = os.listdir(A3_WORKSHOP_DIR)
+        mod_dir = os.listdir(ARMA_MOD_PATH)
 
-        with open(sys.argv[1], 'r') as htmlFile:
+        for modName, modID in MODS.items():
+            if modName not in mod_dir:
+                print("Mod not found in Mod-HTML, delete Mod " + str(modName))
+                os.unlink(workshop_dir + modID)
+                os.unlink(mod_dir + modName)
+            elif modID not in workshop_dir:
+                print("Mod not found in Workshop-Dir, delete Mod " + str(modName))
+                os.unlink(workshop_dir + modID)
+                os.unlink(mod_dir + modName)
+            else:
+                continue
+
+
+##
+#   MAIN-PRGOGRAMM
+#
+##
+buildCMDFlag = False
+cleanFlag = False
+
+# Check if comamnd-line parameters given
+if len(sys.argv) > 2:
+    arguments = sys.argv[1:]
+    print(arguments)
+
+    try:
+        opts, args = getopt.getopt(arguments, "a:s:m:h:b:x:u:p:c:d",
+                                   ['armapath',
+                                    'steampath',
+                                    'modsetfile',
+                                    'help',
+                                    'buildsystemd',
+                                    'headlessclients',
+                                    'steamcmduser',
+                                    'steamcmdpassword',
+                                    'headlessclientpw',
+                                    'deleteoldmods'])
+    except:
+        print("Error to execute Script!")
+        exit()
+
+    for opt, arg in opts:
+
+        if opt in ['-a', '--armapath']:
+            ARMA_SERVER_PATH = arg
+            ARMA_MOD_PATH = arg + '/mods'
+            A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
+
+        elif opt in ['-s', '--steampath']:
+            STEAMCMD = arg
+
+        elif opt in ['-m', '--modsetfile']:
+            MODSET_FILE = arg
+
+        elif opt in ['-h', '--help']:
+            print("Usage: python3 armamods.py -a <arma_server_path> -s <steamcmd_path> -m <modset_file> -b <y> (Build SYSTEMD_FILES) -x <int|Amount of headless clients> -u <steamcmd_user> -p <steamcmd_password> -d <y> (Auto-Cleanup when mods not in modlist.html")
+
+        elif opt in ['-b', '--buildsystemd']:
+            buildCMDFlag = True
+
+        elif opt in ['-x', '--headlessclients']:
+            SYSTEMD_HEADLESS_COUNT = arg
+
+        elif opt in ['-u', '--steamcmduser']:
+            STEAM_USER = arg
+
+        elif opt in ['-p', '--steamcmdpassword']:
+            STEAM_PASSWORD = arg
+
+        elif opt in ['-c', '--headlessclientpw']:
+            SYSTEMD_HEADLESS_PASSWORD = arg
+
+        elif opt in ['-d', '--deleteoldmods']:
+            cleanFlag = True
+
+
+        else:
+            print("Option " + str(opt) + " not found!")
+            continue
+
+
+    # Pasing HTML-File and do our modStuff
+    if os.path.exists(MODSET_FILE):
+
+        with open(MODSET_FILE, 'r') as htmlFile:
             fileContent = htmlFile.read()
 
         # Check if file is empty, when not do our magic stuff ;D We extract the content from the table and extract the mod-id for download
@@ -191,49 +278,29 @@ if len(sys.argv) == 2:
                 modID = row_id[1]
                 MODS[row_cell] = modID
 
-            # Check if result is empty
             if len(MODS) > 0:
                 updateMods()
                 lowercase_mods()
                 createSymLinks()
-                buildSystemd()
+
+                if buildCMDFlag:
+                    buildSystemd()
+
+                if cleanFlag:
+                    cleanUp()
+                exit(0)
+
+            else:
+                print("No Mods imported!")
+                exit(1)
+
+        else:
+            print("ModSet-File " + str(MODSET_FILE) + ' is empty!')
+            exit(1)
+
     else:
-        print("File not found: " + str(sys.argv[1]))
+        print('ModSet-File ' + str(MODSET_FILE) + ' not exists!')
+        exit(1)
 
-# Integrated Ansible-Call for our ansible-playbook
-elif len(sys.argv) == 6:
-    if os.path.exists(sys.argv[1]):
-
-        with open(sys.argv[1], 'r') as htmlFile:
-            fileContent = htmlFile.read()
-
-        # Check if file is empty, when not do our magic stuff ;D We extract the content from the table and extract the mod-id for download
-        if len(fileContent) > 0:
-            soup = BeautifulSoup(fileContent, 'html.parser')
-            MODS = {}
-            for row in soup.table.find_all('tr'):
-                row_cell = row.td.get_text()
-                row_link = row.a.get_text()
-                row_id = row_link.split("=")
-                modID = row_id[1]
-                MODS[row_cell] = modID
-
-
-            # Check if result is empty
-            if len(MODS) > 0:
-                ARMA_SERVER_PATH = sys.argv[2]
-                ARMA_MOD_PATH = ARMA_SERVER_PATH + '/mods'
-                STEAM_USER = sys.argv[4]
-                STEAM_PASSWORD = sys.argv[5]
-                A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
-
-                # Log in with anonymous-user
-                if STEAM_USER == "anonymous":
-                    STEAM_PASSWORD = ''
-
-                STEAMCMD = sys.argv[3] + 'steamcmd.sh'
-
-                updateMods()
-                lowercase_mods()
-                createSymLinks()
-                buildSystemd()
+else:
+    print("Usage: python3 armamods.py -a <arma_server_path> -s <steamcmd_path> -m <modset_file> -b (build systemD-Files) -x <int|Amount of headless clients> -u <steamcmd_user> -p <steamcmd_password>")
