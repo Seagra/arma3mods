@@ -180,18 +180,39 @@ def  cleanUp():
         workshop_dir = os.listdir(A3_WORKSHOP_DIR)
         mod_dir = os.listdir(ARMA_MOD_PATH)
 
-        for modName, modID in MODS.items():
-            if modName not in mod_dir:
-                print("Mod not found in Mod-HTML, delete Mod " + str(modName))
-                os.unlink(workshop_dir + modID)
-                os.unlink(mod_dir + modName)
-            elif modID not in workshop_dir:
-                print("Mod not found in Workshop-Dir, delete Mod " + str(modName))
-                os.unlink(workshop_dir + modID)
-                os.unlink(mod_dir + modName)
-            else:
-                continue
+        if cleanFlag:
+            modDeleted = []
+            for modName, modID in MODS.items():
+                if modName not in mod_dir:
+                    print("Mod not found in Mod-HTML, delete Mod " + str(modName))
+                    os.unlink(workshop_dir + modID)
+                    os.unlink(mod_dir + modName)
+                    modDeleted.append(modName)
+                elif modID not in workshop_dir:
+                    print("Mod not found in Workshop-Dir, delete Mod " + str(modName))
+                    os.unlink(workshop_dir + modID)
+                    os.unlink(mod_dir + modName)
+                    modDeleted.append(modName)
+                else:
+                    continue
 
+            print("Deleted " + str(len(modDeleted)) + " with following mods: " + str(modDeleted))
+        else:
+            modDeleted = []
+            for modName, modID in MODS.items():
+                if modName not in mod_dir:
+                    print("Mod not found in Mod-HTML, delete Mod " + str(modName))
+                    os.unlink(workshop_dir + modID)
+                    os.unlink(mod_dir + modName)
+                    modDeleted.append(modName)
+                elif modID not in workshop_dir:
+                    print("Mod not found in Workshop-Dir, delete Mod " + str(modName).replace('\'', ""))
+                    os.unlink(workshop_dir + modID)
+                    os.unlink(mod_dir + modName)
+                    modDeleted.append(modName)
+                else:
+                    continue
+            print("Numbers of Mods not used: " + str(len(modDeleted)) + " Mods:" + str(modDeleted).replace('\'', ""))
 
 ##
 #   MAIN-PRGOGRAMM
@@ -219,7 +240,7 @@ if len(sys.argv) > 2:
     except:
         print("Error to execute Script!")
         exit()
-
+    print(arguments)
     for opt, arg in opts:
 
         if opt in ['-a', '--armapath']:
@@ -240,7 +261,7 @@ if len(sys.argv) > 2:
             buildCMDFlag = True
 
         elif opt in ['-x', '--headlessclients']:
-            SYSTEMD_HEADLESS_COUNT = str(arg)
+            SYSTEMD_HEADLESS_COUNT = int(arg)
 
         elif opt in ['-u', '--steamcmduser']:
             STEAM_USER = arg
@@ -253,7 +274,6 @@ if len(sys.argv) > 2:
 
         elif opt in ['-d', '--deleteoldmods']:
             cleanFlag = True
-
 
         else:
             print("Option " + str(opt) + " not found!")
@@ -278,6 +298,7 @@ if len(sys.argv) > 2:
                 MODS[row_cell] = modID
 
             if len(MODS) > 0:
+
                 updateMods()
                 lowercase_mods()
                 createSymLinks()
@@ -285,8 +306,7 @@ if len(sys.argv) > 2:
                 if buildCMDFlag:
                     buildSystemd()
 
-                if cleanFlag:
-                    cleanUp()
+                cleanUp()
                 exit(0)
 
             else:
