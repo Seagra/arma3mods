@@ -203,7 +203,6 @@ cleanFlag = False
 # Check if comamnd-line parameters given
 if len(sys.argv) > 2:
     arguments = sys.argv[1:]
-    print(arguments)
 
     try:
         opts, args = getopt.getopt(arguments, "a:s:m:h:b:x:u:p:c:d",
