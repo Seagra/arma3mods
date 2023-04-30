@@ -1,6 +1,5 @@
 import getopt
 import os
-import platform
 import sys
 import os.path
 import re
