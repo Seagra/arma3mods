@@ -240,7 +240,7 @@ if len(sys.argv) > 2:
             buildCMDFlag = True
 
         elif opt in ['-x', '--headlessclients']:
-            SYSTEMD_HEADLESS_COUNT = arg
+            SYSTEMD_HEADLESS_COUNT = str(arg)
 
         elif opt in ['-u', '--steamcmduser']:
             STEAM_USER = arg
