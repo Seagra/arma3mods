@@ -217,7 +217,6 @@ def  cleanUp():
 #   MAIN-PRGOGRAMM
 #
 ##
-buildCMDFlag = False
 cleanFlag = False
 
 # Check if comamnd-line parameters given
@@ -225,12 +224,11 @@ if len(sys.argv) > 2:
     arguments = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(arguments, "a:s:m:h:b:x:u:p:c:d",
+        opts, args = getopt.getopt(arguments, "a:s:m:h:x:u:p:c:d",
                                    ['armapath',
                                     'steampath',
                                     'modsetfile',
                                     'help',
-                                    'buildsystemd',
                                     'headlessclients',
                                     'steamcmduser',
                                     'steamcmdpassword',
@@ -255,9 +253,6 @@ if len(sys.argv) > 2:
 
         elif opt in ['-h', '--help']:
             print("Usage: python3 armamods.py -a <arma_server_path> -s <steamcmd_path> -m <modset_file> -b <y> (Build SYSTEMD_FILES) -x <int|Amount of headless clients> -u <steamcmd_user> -p <steamcmd_password> -d <y> (Auto-Cleanup when mods not in modlist.html")
-
-        elif opt in ['-b', '--buildsystemd']:
-            buildCMDFlag = True
 
         elif opt in ['-x', '--headlessclients']:
             SYSTEMD_HEADLESS_COUNT = int(arg)
@@ -302,10 +297,10 @@ if len(sys.argv) > 2:
                 lowercase_mods()
                 createSymLinks()
 
-                if buildCMDFlag:
-                    buildSystemd()
+                buildSystemd()
 
-                cleanUp()
+                if cleanFlag:
+                    cleanUp()
                 exit(0)
 
             else:
