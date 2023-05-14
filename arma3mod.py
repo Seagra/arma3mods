@@ -1,5 +1,6 @@
 import getopt
 import os
+import platform
 import sys
 import os.path
 import re
@@ -34,6 +35,7 @@ SYSTEMD_HEADLESS_COUNT = 3
 SYSTEMD_HEADLESS_SERVICE = 'armaclient'
 SYSTEMD_USER = 'arma'
 SYSTEMD_GROUP = 'arma'
+SERVERNAME = 'armaserver'
 
 HEADLESS_CONNECT_ADDRESS = '127.0.0.1'
 HEADLESS_CONNECT_PORT = 2302
@@ -130,7 +132,7 @@ def updateMods():
 def buildSystemd():
     if SYSTEMD_BUILD:
         print("Build Server-File")
-        serverFileContent = '[Unit] \n Description= Arma3Server Service File \n Wants=network-online.target \n Before=arma.target \n PartOf=arma.target \n \n'
+        serverFileContent = '[Unit] \n Description= Arma3Server ' + SERVERNAME +  ' Service File \n Wants=network-online.target \n Before=arma.target \n PartOf=arma.target \n \n'
         serverFileContent += '[Service] \n Type=simple \n Restart=on-failure \n ExecStartPre=/bin/sleep 10 \n User=' + SYSTEMD_USER + ' \n Group=' + SYSTEMD_GROUP + ' \n WorkingDirectory=' + ARMA_SERVER_PATH + '/  \n ExecStart=' + ARMA_SERVER_PATH + '/./arma3server_x64 -exThreads=7 -config=server.cfg '
         modRelativePath = ARMA_MOD_PATH.split("/")
         for modName, modID in MODS.items():
@@ -157,7 +159,7 @@ def buildSystemd():
                 serverFileContent += '\n'
                 serverFileContent += '[Install] \n WantedBy=arma.target'
 
-                with open('/etc/systemd/system/' + SYSTEMD_HEADLESS_SERVICE + str(count) + '.service', 'w+') as file:
+                with open('/etc/systemd/system/' + SYSTEMD_SERVER_SERVICE + '_client' + str(count) + '.service', 'w+') as file:
                     file.write(serverFileContent)
                 count = count + 1
 
@@ -179,39 +181,18 @@ def  cleanUp():
         workshop_dir = os.listdir(A3_WORKSHOP_DIR)
         mod_dir = os.listdir(ARMA_MOD_PATH)
 
-        if cleanFlag:
-            modDeleted = []
-            for modName, modID in MODS.items():
-                if modName not in mod_dir:
-                    print("Mod not found in Mod-HTML, delete Mod " + str(modName))
-                    os.unlink(workshop_dir + modID)
-                    os.unlink(mod_dir + modName)
-                    modDeleted.append(modName)
-                elif modID not in workshop_dir:
-                    print("Mod not found in Workshop-Dir, delete Mod " + str(modName))
-                    os.unlink(workshop_dir + modID)
-                    os.unlink(mod_dir + modName)
-                    modDeleted.append(modName)
-                else:
-                    continue
+        for modName, modID in MODS.items():
+            if modName not in mod_dir:
+                print("Mod not found in Mod-HTML, delete Mod " + str(modName))
+                os.unlink(workshop_dir + modID)
+                os.unlink(mod_dir + modName)
+            elif modID not in workshop_dir:
+                print("Mod not found in Workshop-Dir, delete Mod " + str(modName))
+                os.unlink(workshop_dir + modID)
+                os.unlink(mod_dir + modName)
+            else:
+                continue
 
-            print("Deleted " + str(len(modDeleted)) + " with following mods: " + str(modDeleted))
-        else:
-            modDeleted = []
-            for modName, modID in MODS.items():
-                if modName not in mod_dir:
-                    print("Mod not found in Mod-HTML, delete Mod " + str(modName))
-                    os.unlink(workshop_dir + modID)
-                    os.unlink(mod_dir + modName)
-                    modDeleted.append(modName)
-                elif modID not in workshop_dir:
-                    print("Mod not found in Workshop-Dir, delete Mod " + str(modName).replace('\'', ""))
-                    os.unlink(workshop_dir + modID)
-                    os.unlink(mod_dir + modName)
-                    modDeleted.append(modName)
-                else:
-                    continue
-            print("Numbers of Mods not used: " + str(len(modDeleted)) + " Mods:" + str(modDeleted).replace('\'', ""))
 
 ##
 #   MAIN-PRGOGRAMM
@@ -219,16 +200,18 @@ def  cleanUp():
 ##
 cleanFlag = False
 
+
 # Check if comamnd-line parameters given
 if len(sys.argv) > 2:
     arguments = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(arguments, "a:s:m:h:x:u:p:c:d",
+        opts, args = getopt.getopt(arguments, "a:s:m:h:b:x:u:p:c:d:n",
                                    ['armapath',
                                     'steampath',
                                     'modsetfile',
                                     'help',
+                                    'buildsystemd',
                                     'headlessclients',
                                     'steamcmduser',
                                     'steamcmdpassword',
@@ -237,7 +220,7 @@ if len(sys.argv) > 2:
     except:
         print("Error to execute Script!")
         exit()
-    print(arguments)
+
     for opt, arg in opts:
 
         if opt in ['-a', '--armapath']:
@@ -248,14 +231,18 @@ if len(sys.argv) > 2:
         elif opt in ['-s', '--steampath']:
             STEAMCMD = arg
 
+        elif opt in ['-n', '--servername']:
+            SERVERNAME = arg
+            SYSTEMD_SERVER_SERVICE = arg
+
         elif opt in ['-m', '--modsetfile']:
             MODSET_FILE = arg
 
         elif opt in ['-h', '--help']:
-            print("Usage: python3 armamods.py -a <arma_server_path> -s <steamcmd_path> -m <modset_file> -b <y> (Build SYSTEMD_FILES) -x <int|Amount of headless clients> -u <steamcmd_user> -p <steamcmd_password> -d <y> (Auto-Cleanup when mods not in modlist.html")
+            print("Usage: python3 armamods.py -a <arma_server_path> -s <steamcmd_path> -m <modset_file> -b <y> (Build SYSTEMD_FILES) -x <int|Amount of headless clients> -u <steamcmd_user> -p <steamcmd_password> -d <y> (Auto-Cleanup when mods not in modlist.html -n <servername> -c headless-password")
 
         elif opt in ['-x', '--headlessclients']:
-            SYSTEMD_HEADLESS_COUNT = int(arg)
+            SYSTEMD_HEADLESS_COUNT = arg
 
         elif opt in ['-u', '--steamcmduser']:
             STEAM_USER = arg
@@ -268,6 +255,7 @@ if len(sys.argv) > 2:
 
         elif opt in ['-d', '--deleteoldmods']:
             cleanFlag = True
+
 
         else:
             print("Option " + str(opt) + " not found!")
@@ -292,7 +280,6 @@ if len(sys.argv) > 2:
                 MODS[row_cell] = modID
 
             if len(MODS) > 0:
-
                 updateMods()
                 lowercase_mods()
                 createSymLinks()
