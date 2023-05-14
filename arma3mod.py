@@ -242,7 +242,7 @@ if len(sys.argv) > 2:
             print("Usage: python3 armamods.py -a <arma_server_path> -s <steamcmd_path> -m <modset_file> -b <y> (Build SYSTEMD_FILES) -x <int|Amount of headless clients> -u <steamcmd_user> -p <steamcmd_password> -d <y> (Auto-Cleanup when mods not in modlist.html -n <servername> -c headless-password")
 
         elif opt in ['-x', '--headlessclients']:
-            SYSTEMD_HEADLESS_COUNT = arg
+            SYSTEMD_HEADLESS_COUNT = int(arg)
 
         elif opt in ['-u', '--steamcmduser']:
             STEAM_USER = arg
