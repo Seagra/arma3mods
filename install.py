@@ -127,8 +127,8 @@ def buildSystemd():
     serverFileContent += '[Service] \n Type=simple \n Restart=on-failure \n User=' + SYSTEMD_USER + ' \n Group=' + SYSTEMD_GROUP + ' \n WorkingDirectory=' + ARMA_SERVER_PATH + '/  \n ExecStart=' + ARMA_SERVER_PATH + '/./arma3server_x64 '
 
     # Checkout our start_parameters
-    if CMD_PARAMS[0] != "empty":
-        for element in CMD_PARAMS:
+    if paramList[0] != "empty":
+        for element in paramList:
             serverFileContent += str(element) + ' '
 
     modRelativePath = ARMA_MOD_PATH.split("/")
@@ -170,6 +170,7 @@ if os.path.exists(CONFIG_FILE):
     STEAM_PASSWORD = config['STEAM']['STEAM_PASSWORD']
     SYSTEMD_USER = config['ARMA']['SERVER_USER']
     SYSTEMD_GROUP = config['ARMA']['SERVER_GROUP']
+    A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
 
     paramList = []
     if(len(config['ARMA']['START_PARAMETERS']) > 0):
