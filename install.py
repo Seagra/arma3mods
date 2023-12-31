@@ -163,6 +163,7 @@ def buildSystemd():
             print('Option ' + str(opt) + ' is not valid!')
             exit(1)
 
+    print("Hier 1")
     # load Config-Elements
     if os.path.exists(CONFIG_FILE):
         config = configparser.ConfigParser()
@@ -183,11 +184,10 @@ def buildSystemd():
     else:
         print("Config-File can not be loaded!")
         exit(1)
-
-
+    print("Hier2")
     with open(MODSET_FILE, 'r') as htmlFile:
         fileContent = htmlFile.read()
-
+    print("Hier3")
     # Check if file is empty, when not do our magic stuff ;D We extract the content from the table and extract the mod-id for download
     if len(fileContent) > 0:
         soup = BeautifulSoup(fileContent, 'html.parser')
