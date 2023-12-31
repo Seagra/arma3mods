@@ -150,66 +150,65 @@ def buildSystemd():
     os.system('chown ' + SYSTEMD_USER + ':' + SYSTEMD_GROUP + ' ' + ARMA_MOD_PATH + ' -R')
 
 
-    # We load our Config-File for Arma-Server from path and load the modset.html-file
-    for opt, arg in sys.argv:
+# We load our Config-File for Arma-Server from path and load the modset.html-file
+for opt, arg in sys.argv:
 
-        if opt in ['-m', '--modset']:
-            MODSET_FILE = arg
+    if opt in ['-m', '--modset']:
+        MODSET_FILE = arg
 
-        elif opt in ['-c', '--config']:
-            CONFIG_FILE = arg
-
-        else:
-            print('Option ' + str(opt) + ' is not valid!')
-            exit(1)
-
-    print("Hier 1")
-    # load Config-Elements
-    if os.path.exists(CONFIG_FILE):
-        config = configparser.ConfigParser()
-        config.read(CONFIG_FILE)
-
-        ARMA_SERVER_PATH = config['ARMA']['SERVER_PATH']
-        STEAMCMD = config['STEAM']['STEAM_PATH']
-        STEAM_USER = config['STEAM']['STEAM_USER']
-        STEAM_PASSWORD = config['STEAM']['STEAM_PASSWORD']
-        SYSTEMD_USER = config['ARMA']['SERVER_USER']
-        SYSTEMD_GROUP = config['ARMA']['SERVER_GROUP']
-
-        paramList = []
-        if(len(config['ARMA']['START_PARAMETERS']) > 0):
-            paramList = config['ARMA']['START_PARAMETERS'].split(",")
-        else:
-            paramList = ["empty"]
-    else:
-        print("Config-File can not be loaded!")
-        exit(1)
-    print("Hier2")
-    with open(MODSET_FILE, 'r') as htmlFile:
-        fileContent = htmlFile.read()
-    print("Hier3")
-    # Check if file is empty, when not do our magic stuff ;D We extract the content from the table and extract the mod-id for download
-    if len(fileContent) > 0:
-        soup = BeautifulSoup(fileContent, 'html.parser')
-        MODS = {}
-        for row in soup.table.find_all('tr'):
-            row_cell = row.td.get_text()
-            row_link = row.a.get_text()
-            row_id = row_link.split("=")
-            modID = row_id[1]
-            MODS[row_cell] = modID
-
-        # Check if result is empty
-        if len(MODS) > 0:
-            updateMods()
-            lowercase_mods()
-            createSymLinks()
-            buildSystemd()
-            print("Installed!")
-        else:
-            print("Nothing to do")
-            exit(0)
+    elif opt in ['-c', '--config']:
+        CONFIG_FILE = arg
 
     else:
-        print("Config not found!")
+        print('Option ' + str(opt) + ' is not valid!')
         exit(1)
+
+# load Config-Elements
+if os.path.exists(CONFIG_FILE):
+    config = configparser.ConfigParser()
+    config.read(CONFIG_FILE)
+
+    ARMA_SERVER_PATH = config['ARMA']['SERVER_PATH']
+    STEAMCMD = config['STEAM']['STEAM_PATH']
+    STEAM_USER = config['STEAM']['STEAM_USER']
+    STEAM_PASSWORD = config['STEAM']['STEAM_PASSWORD']
+    SYSTEMD_USER = config['ARMA']['SERVER_USER']
+    SYSTEMD_GROUP = config['ARMA']['SERVER_GROUP']
+
+    paramList = []
+    if(len(config['ARMA']['START_PARAMETERS']) > 0):
+        paramList = config['ARMA']['START_PARAMETERS'].split(",")
+    else:
+        paramList = ["empty"]
+else:
+    print("Config-File can not be loaded!")
+    exit(1)
+
+with open(MODSET_FILE, 'r') as htmlFile:
+    fileContent = htmlFile.read()
+
+# Check if file is empty, when not do our magic stuff ;D We extract the content from the table and extract the mod-id for download
+if len(fileContent) > 0:
+    soup = BeautifulSoup(fileContent, 'html.parser')
+    MODS = {}
+    for row in soup.table.find_all('tr'):
+        row_cell = row.td.get_text()
+        row_link = row.a.get_text()
+        row_id = row_link.split("=")
+        modID = row_id[1]
+        MODS[row_cell] = modID
+
+    # Check if result is empty
+    if len(MODS) > 0:
+        updateMods()
+        lowercase_mods()
+        createSymLinks()
+        buildSystemd()
+        print("Installed!")
+    else:
+        print("Nothing to do")
+        exit(0)
+
+else:
+    print("Config not found!")
+    exit(1)
