@@ -142,7 +142,7 @@ def buildSystemd():
     serverFileContent += '\n'
     serverFileContent += '[Install] \n WantedBy=multi-user.target'
 
-    with open('/etc/systemd/system/' + SYSTEMD_SERVER_SERVICE + '.service', 'w+') as file:
+    with open('/etc/systemd/system/armaserver.service', 'w+') as file:
         file.write(serverFileContent)
     # Reload SystemCTL-Daemon
     os.system('systemctl daemon-reload')
@@ -204,6 +204,7 @@ if len(fileContent) > 0:
         createSymLinks()
         buildSystemd()
         print("Installed!")
+        exit(0)
     else:
         print("Nothing to do")
         exit(0)
