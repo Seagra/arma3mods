@@ -1,8 +1,10 @@
+import getopt
 import os
 import sys
 import os.path
 import re
 import shutil
+
 from bs4 import BeautifulSoup
 import configparser
 
@@ -150,8 +152,24 @@ def buildSystemd():
     os.system('chown ' + SYSTEMD_USER + ':' + SYSTEMD_GROUP + ' ' + ARMA_MOD_PATH + ' -R')
 
 
+####
+#
+#
+####
+
+arguments = sys.argv[1:]
+try:
+    opts, args = getopt.getopt(arguments, "c:m",
+                                   [
+                                'modsetfile',
+                                'config',
+                                ])
+except:
+    print("Error to execute Script!")
+    exit()
+
 # We load our Config-File for Arma-Server from path and load the modset.html-file
-for opt, arg in sys.argv:
+for opt, arg in opts:
 
     if opt in ['-m', '--modset']:
         MODSET_FILE = arg
