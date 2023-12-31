@@ -168,6 +168,8 @@ except:
     print("Error to execute Script!")
     exit()
 
+print(arguments)
+
 # We load our Config-File for Arma-Server from path and load the modset.html-file
 for opt, arg in opts:
 
