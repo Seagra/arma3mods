@@ -180,6 +180,9 @@ def buildSystemd():
             paramList = config['ARMA']['START_PARAMETERS'].split(",")
         else:
             paramList = ["empty"]
+    else:
+        print("Config-File can not be loaded!")
+        exit(1)
 
 
     with open(MODSET_FILE, 'r') as htmlFile:
