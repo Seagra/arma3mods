@@ -60,10 +60,6 @@ def createSymLinks():
         linkPath = "{}/{}".format(ARMA_MOD_PATH, modName)
         realPath = "{}/{}".format(A3_WORKSHOP_DIR, modID)
 
-        # If not exists, create Folder for Mods
-        if not os.path.isdir((linkPath)):
-            os.mkdir(linkPath)
-
         if os.path.isdir(realPath):
             if not os.path.exists(linkPath):
                 os.symlink(realPath, linkPath)
@@ -168,6 +164,7 @@ if os.path.exists(CONFIG_FILE):
     config.read(CONFIG_FILE)
 
     ARMA_SERVER_PATH = config['ARMA']['SERVER_PATH']
+    ARMA_MOD_PATH = ARMA_SERVER_PATH + '/mods'
     STEAMCMD = config['STEAM']['STEAM_PATH']
     STEAM_USER = config['STEAM']['STEAM_USER']
     STEAM_PASSWORD = config['STEAM']['STEAM_PASSWORD']
@@ -199,6 +196,10 @@ if len(fileContent) > 0:
 
     # Check if result is empty
     if len(MODS) > 0:
+        # If not exists, create Folder for Mods
+        if not os.path.isdir(ARMA_MOD_PATH):
+            os.mkdir(ARMA_MOD_PATH)
+
         updateMods()
         lowercase_mods()
         createSymLinks()
