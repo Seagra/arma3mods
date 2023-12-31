@@ -205,6 +205,7 @@ def buildSystemd():
             lowercase_mods()
             createSymLinks()
             buildSystemd()
+            print("Installed!")
         else:
             print("Nothing to do")
             exit(0)
