@@ -157,31 +157,10 @@ def buildSystemd():
 #
 ####
 
-arguments = sys.argv[1:]
-try:
-    opts, args = getopt.getopt(arguments, "c:m",
-                                   [
-                                'modsetfile',
-                                'config',
-                                ])
-except:
-    print("Error to execute Script!")
-    exit()
-
-print(arguments)
 
 # We load our Config-File for Arma-Server from path and load the modset.html-file
-for opt, arg in opts:
-
-    if opt in ['-m', '--modset']:
-        MODSET_FILE = arg
-
-    elif opt in ['-c', '--config']:
-        CONFIG_FILE = arg
-
-    else:
-        print('Option ' + str(opt) + ' is not valid!')
-        exit(1)
+CONFIG_FILE = sys.argv[1]
+MODSET_FILE = sys.argv[2]
 
 # load Config-Elements
 if os.path.exists(CONFIG_FILE):
