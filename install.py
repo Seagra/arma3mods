@@ -85,7 +85,8 @@ def modUpdate(modID, modPath):
             createdAt = datetime.fromtimestamp(os.path.getctime(modPath))
 
             return (updatedAt >= createdAt)
-        return False
+        else:
+            return False
 
 
 # Update Mods
@@ -99,18 +100,14 @@ def updateMods():
             if modUpdate(modID, path):
                 shutil.rmtree(path)
                 print('Update for Mod {} found, start update...'.format(modName))
-                steamCMDParam += " +workshop_download_item {} {} ".format(ARMA3_WORKSHOP_ID, modID)
-                continue
+                steamCMDParam += " +workshop_download_item {} {} validate".format(ARMA3_WORKSHOP_ID, modID)
             else:
                 print("No Update needed for Mod {}".format(modName))
-                continue
         elif not(os.path.exists(path)):
             print("Mod not existing, install mod ""{}".format(modName))
-            steamCMDParam += " +workshop_download_item {} {} ".format(ARMA3_WORKSHOP_ID, modID)
-            continue
+            steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
         else:
             print("No Update for Mod '{}' required!".format(modName))
-            continue
 
     if "+workshop_download_item" in steamCMDParam:
         print('Start Mod-Download')
