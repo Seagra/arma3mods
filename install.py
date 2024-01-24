@@ -141,9 +141,6 @@ def modUpdate(modID, modPath):
 
         else:
             return False
-    else:
-        return True
-
 
 # Update Mods
 def updateMods():
