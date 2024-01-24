@@ -135,10 +135,6 @@ def modUpdate(modID, modPath):
                 return True
             else:
                 return False
-
-        elif FORCE:
-            return True
-
         else:
             return False
 
@@ -160,6 +156,7 @@ def updateMods():
                 if FORCE:
                     print("FORCE Update for Mod {}".format(modName))
                     steamCMDParam += " +workshop_download_item {} {} validate".format(ARMA3_WORKSHOP_ID, modID)
+
         elif not(os.path.exists(path)):
             print("Mod not existing, install mod ""{}".format(modName))
             steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
