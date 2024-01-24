@@ -34,6 +34,52 @@ A3_UPDATE_PATTERN = re.compile(r"workshopAnnouncement.*?<p id=\"(\d+)\">", re.DO
 A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
 A3_CHANGELOG_URL = 'https://steamcommunity.com/sharedfiles/filedetails/changelog'
 
+
+
+####
+#
+#
+####
+
+
+# We load our Config-File for Arma-Server from path and load the modset.html-file
+CONFIG_FILE = sys.argv[1]
+MODSET_FILE = sys.argv[2]
+
+if not sys.argv[3]:
+    FORCE = False
+else:
+    FORCE = True
+
+
+# load Config-Elements
+if os.path.exists(CONFIG_FILE):
+    config = configparser.ConfigParser()
+    config.read(CONFIG_FILE)
+
+    ARMA_SERVER_PATH = config['ARMA']['SERVER_PATH']
+    ARMA_MOD_PATH = ARMA_SERVER_PATH + '/mods'
+    STEAMCMD = config['STEAM']['STEAM_PATH']
+    STEAM_USER = config['STEAM']['STEAM_USER']
+    STEAM_PASSWORD = config['STEAM']['STEAM_PASSWORD']
+    SYSTEMD_USER = config['ARMA']['SERVER_USER']
+    SYSTEMD_GROUP = config['ARMA']['SERVER_GROUP']
+    A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
+
+    paramList = []
+    if(len(config['ARMA']['START_PARAMETERS']) > 0):
+        paramList = config['ARMA']['START_PARAMETERS'].split(",")
+    else:
+        paramList = ["empty"]
+else:
+    print("Config-File can not be loaded!")
+    exit(1)
+
+with open(MODSET_FILE, 'r') as htmlFile:
+    fileContent = htmlFile.read()
+
+
+
 ###
 # FUNCTIONS
 ####
@@ -80,11 +126,14 @@ def modUpdate(modID, modPath):
 
         matchPattern = A3_UPDATE_PATTERN.search(response)
 
-        if matchPattern:
+        if matchPattern or FORCE:
             updatedAt = datetime.fromtimestamp(int(matchPattern.group(1)))
             createdAt = datetime.fromtimestamp(os.path.getctime(modPath))
 
-            return (updatedAt >= createdAt)
+            if updatedAt >= createdAt or FORCE:
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -145,41 +194,6 @@ def buildSystemd():
     os.system('chown ' + SYSTEMD_USER + ':' + SYSTEMD_GROUP + ' ' + ARMA_MOD_PATH + ' -R')
 
 
-####
-#
-#
-####
-
-
-# We load our Config-File for Arma-Server from path and load the modset.html-file
-CONFIG_FILE = sys.argv[1]
-MODSET_FILE = sys.argv[2]
-
-# load Config-Elements
-if os.path.exists(CONFIG_FILE):
-    config = configparser.ConfigParser()
-    config.read(CONFIG_FILE)
-
-    ARMA_SERVER_PATH = config['ARMA']['SERVER_PATH']
-    ARMA_MOD_PATH = ARMA_SERVER_PATH + '/mods'
-    STEAMCMD = config['STEAM']['STEAM_PATH']
-    STEAM_USER = config['STEAM']['STEAM_USER']
-    STEAM_PASSWORD = config['STEAM']['STEAM_PASSWORD']
-    SYSTEMD_USER = config['ARMA']['SERVER_USER']
-    SYSTEMD_GROUP = config['ARMA']['SERVER_GROUP']
-    A3_WORKSHOP_DIR = "{}/steamapps/workshop/content/{}".format(ARMA_SERVER_PATH, ARMA3_WORKSHOP_ID)
-
-    paramList = []
-    if(len(config['ARMA']['START_PARAMETERS']) > 0):
-        paramList = config['ARMA']['START_PARAMETERS'].split(",")
-    else:
-        paramList = ["empty"]
-else:
-    print("Config-File can not be loaded!")
-    exit(1)
-
-with open(MODSET_FILE, 'r') as htmlFile:
-    fileContent = htmlFile.read()
 
 # Check if file is empty, when not do our magic stuff ;D We extract the content from the table and extract the mod-id for download
 if len(fileContent) > 0:
