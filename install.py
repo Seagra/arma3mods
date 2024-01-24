@@ -26,6 +26,7 @@ CONFIG_FILE = ''
 CMD_PARAMS = ''
 SYSTEM_USER = ''
 SYSTEMD_GROUP = ''
+FORCE = False
 
 ARMA3_WORKSHOP_ID = '107410'
 ARMA3_SERVER_ID = '233780'
@@ -107,7 +108,10 @@ def updateMods():
             print("Mod not existing, install mod ""{}".format(modName))
             steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
         else:
-            print("No Update for Mod '{}' required!".format(modName))
+            if FORCE:
+                print("FORCE Update for Mod '{}' required!".format(modName))
+            else:
+                print("No Update for Mod '{}' required!".format(modName))
 
     if "+workshop_download_item" in steamCMDParam:
         print('Start Mod-Download')
@@ -154,6 +158,9 @@ def buildSystemd():
 # We load our Config-File for Arma-Server from path and load the modset.html-file
 CONFIG_FILE = sys.argv[1]
 MODSET_FILE = sys.argv[2]
+
+if len(sys.argv) == 4:
+    FORCE = True
 
 # load Config-Elements
 if os.path.exists(CONFIG_FILE):
