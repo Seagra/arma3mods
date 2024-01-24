@@ -147,7 +147,7 @@ def updateMods():
     for modName, modID in MODS.items():
         path = "{}/{}".format(A3_WORKSHOP_DIR, modID)
 
-        if os.path.exists(path):
+        if os.path.exists(path) or FORCE:
             if modUpdate(modID, path):
                 shutil.rmtree(path)
                 print('Update for Mod {} found, start update...'.format(modName))
