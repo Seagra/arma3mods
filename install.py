@@ -110,6 +110,7 @@ def updateMods():
         else:
             if FORCE:
                 print("FORCE Update for Mod '{}' required!".format(modName))
+                steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
             else:
                 print("No Update for Mod '{}' required!".format(modName))
 
