@@ -153,7 +153,7 @@ def updateMods():
             else:
                 print("No Update needed for Mod {}".format(modName))
 
-                if FORCE:
+                if FORCE and modID not in steamCMDParam:
                     print("FORCE Update for Mod {}".format(modName))
                     steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
 
