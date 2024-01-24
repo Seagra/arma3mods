@@ -46,10 +46,10 @@ A3_CHANGELOG_URL = 'https://steamcommunity.com/sharedfiles/filedetails/changelog
 CONFIG_FILE = sys.argv[1]
 MODSET_FILE = sys.argv[2]
 
-if not sys.argv[3]:
-    FORCE = False
-else:
+if len(sys.argv) == 4:
     FORCE = True
+else:
+    FORCE = False
 
 
 # load Config-Elements
