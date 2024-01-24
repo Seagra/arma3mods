@@ -149,13 +149,13 @@ def updateMods():
             if modUpdate(modID, path):
                 shutil.rmtree(path)
                 print('Update for Mod {} found, start update...'.format(modName))
-                steamCMDParam += " +workshop_download_item {} {} validate".format(ARMA3_WORKSHOP_ID, modID)
+                steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
             else:
                 print("No Update needed for Mod {}".format(modName))
 
                 if FORCE:
                     print("FORCE Update for Mod {}".format(modName))
-                    steamCMDParam += " +workshop_download_item {} {} validate".format(ARMA3_WORKSHOP_ID, modID)
+                    steamCMDParam += " +workshop_download_item {} {} validate ".format(ARMA3_WORKSHOP_ID, modID)
 
         elif not(os.path.exists(path)):
             print("Mod not existing, install mod ""{}".format(modName))
