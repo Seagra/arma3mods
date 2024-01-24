@@ -126,18 +126,23 @@ def modUpdate(modID, modPath):
 
         matchPattern = A3_UPDATE_PATTERN.search(response)
 
-        if matchPattern or FORCE:
+        if matchPattern:
             updatedAt = datetime.fromtimestamp(int(matchPattern.group(1)))
             createdAt = datetime.fromtimestamp(os.path.getctime(modPath))
 
-            if FORCE:
-                return True
-            elif updatedAt >= createdAt:
+
+            if updatedAt >= createdAt:
                 return True
             else:
                 return False
+
+        elif FORCE:
+            return True
+
         else:
             return False
+    else:
+        return True
 
 
 # Update Mods
