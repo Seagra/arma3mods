@@ -130,7 +130,9 @@ def modUpdate(modID, modPath):
             updatedAt = datetime.fromtimestamp(int(matchPattern.group(1)))
             createdAt = datetime.fromtimestamp(os.path.getctime(modPath))
 
-            if updatedAt >= createdAt or FORCE:
+            if FORCE:
+                return True
+            elif updatedAt >= createdAt:
                 return True
             else:
                 return False
